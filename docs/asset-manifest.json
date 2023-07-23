@@ -1,12 +1,15 @@
 {
   "files": {
-    "main.js": "/go/static/js/main.49619711.js",
-    "static/js/787.869de754.chunk.js": "/go/static/js/787.869de754.chunk.js",
-    "index.html": "/go/index.html",
-    "main.49619711.js.map": "/go/static/js/main.49619711.js.map",
-    "787.869de754.chunk.js.map": "/go/static/js/787.869de754.chunk.js.map"
+    "main.css": "/soccer-match/static/css/main.d02f2934.css",
+    "main.js": "/soccer-match/static/js/main.d2c01eb6.js",
+    "static/js/787.0bd8db2a.chunk.js": "/soccer-match/static/js/787.0bd8db2a.chunk.js",
+    "index.html": "/soccer-match/index.html",
+    "main.d02f2934.css.map": "/soccer-match/static/css/main.d02f2934.css.map",
+    "main.d2c01eb6.js.map": "/soccer-match/static/js/main.d2c01eb6.js.map",
+    "787.0bd8db2a.chunk.js.map": "/soccer-match/static/js/787.0bd8db2a.chunk.js.map"
   },
   "entrypoints": [
-    "static/js/main.49619711.js"
+    "static/css/main.d02f2934.css",
+    "static/js/main.d2c01eb6.js"
   ]
 }
