@@ -31,28 +31,23 @@ body {
   width: 1rem;
   font-size: 10px;
   color: black;
+  cursor: pointer;
+}
+.field-block:hover,
+.field-block:focus,
+.field-block:active {
+  border: 1px solid white;
 }
 .field-block-goal {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-#field-col-c1 > div.field-block:nth-child(4),
-#field-col-c1 > div.field-block:nth-child(5),
-#field-col-c1 > div.field-block:nth-child(6),
-#field-col-c1 > div.field-block:nth-child(7),
-#field-col-c22 > div.field-block:nth-child(4),
-#field-col-c22 > div.field-block:nth-child(5),
-#field-col-c22 > div.field-block:nth-child(6),
-#field-col-c22 > div.field-block:nth-child(7) {
   background-color: rgba(255, 255, 255, 0.5);
 }
 
-.field-block-blue {
+.field-block-team-blue {
   background-color: darkblue;
 }
-.field-block-red {
+.field-block-team-red {
   background-color: darkred;
 }
-#field-col-c11 > div.field-block:nth-child(5) {
-  background-color: #cecece;
+.field-block-ball {
+  background-color: whitesmoke
 }

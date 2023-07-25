@@ -5,67 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Soccer Match</title>
     <link rel="stylesheet" href="css/global.css" />
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-
-        const gameState = {
-          players: [
-            { position: { column: 4, row: 3 }, name: 'R9', team: 'red' },
-            { position: { column: 3, row: 6 }, name: 'R7', team: 'red' },
-            { position: { column: 6, row: 9 }, name: 'R7', team: 'red' },
-            { position: { column: 8, row: 6 }, name: 'R7', team: 'blue' },
-            { position: { column: 8, row: 6 }, name: 'R7', team: 'blue' },
-            { position: { column: 12, row: 6 }, name: 'R7', team: 'blue' },
-            { position: { column: 9, row: 7 }, name: 'R10', team: 'blue' }
-          ]
-        }
-
-        const fieldMaps = {
-          columns: 20,
-          rows: 10
-        }
-
-        const addToField = (htmlContent) => {
-          document.getElementById('field').innerHTML = (
-            (document.getElementById('field').innerHTML) + htmlContent
-          );
-        }
-
-        const startGame = () => {
-
-          let fieldBlockId = '', prepareHtmlContent = '', hasPlayer = '';
-          for (let counterColumns = 1; counterColumns <= fieldMaps.columns; counterColumns++) {
-            prepareHtmlContent = (`<div id="field-col-c${counterColumns}" class="field-col">`);
-            for (let counterRows = 1; counterRows <= fieldMaps.rows; counterRows++) {
-              fieldBlockId = `field-block-c${counterColumns}-r${counterRows}`;
-
-              hasPlayer = '';
-              for (let counter = 0; counter < gameState.players.length; counter++) {
-                if (
-                  gameState.players[counter].position.column == counterColumns &&
-                  gameState.players[counter].position.row == counterRows
-                ) {
-                  hasPlayer = gameState.players[counter].team;
-                  break;
-                }
-              }
-              if (!hasPlayer) {
-                prepareHtmlContent += (`<div id="${fieldBlockId}" class="field-block"></div>`);
-              } else {
-                prepareHtmlContent += (`<div id="${fieldBlockId}" class="field-block field-block-${hasPlayer}"></div>`);
-              }
-
-            }
-            prepareHtmlContent += (`</div>`);
-            addToField(prepareHtmlContent);
-          }
-
-        }
-
-        startGame();
-
-      });
-    </script>
+    <script type="module" src="js/init.js"></script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
