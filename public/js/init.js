@@ -1,9 +1,14 @@
 import { startGame, refreshGame } from './global.js';
-import { FIELD_COLUMN_MAX_LIMIT, FIELD_ROW_MAX_LIMIT, RENDER_INTERVAL } from './configs.js';
+import {
+  FIELD_COLUMN_MAX_LIMIT,
+  FIELD_ROW_MAX_LIMIT,
+  LOG_LEVEL,
+  RENDER_INTERVAL
+} from './configs.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-  window['log_level'] = 'debug';
+  window['log_level'] = LOG_LEVEL;
 
   let gameState = {
     players: [

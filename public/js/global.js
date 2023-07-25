@@ -58,6 +58,7 @@ const rowPositionToBottom = (row, skip = false) => (row + 1 + (skip ? 1 : 0 )); 
 const getNewBallPosition = (newGameStatusContext, currentBallPosition, newBallPosition) => {
   log(getNewBallPosition.name);
 
+  // vertical
   if (
     (newBallPosition.row < currentBallPosition.row) &&
     hasPlayer(newGameStatusContext, newBallPosition.column, rowPositionToTop(newBallPosition.row))
@@ -95,9 +96,9 @@ const getNewBallPosition = (newGameStatusContext, currentBallPosition, newBallPo
       column: newBallPosition.column
     }
   }
-
-
-  if (
+  
+  // horizontal
+  else if (
     (newBallPosition.column < currentBallPosition.column) &&
     hasPlayer(newGameStatusContext, columnPositionToLeft(newBallPosition.column), newBallPosition.row)
   ) {
@@ -146,9 +147,6 @@ const refreshGame = (currentFieldMap, newFieldMap, currentGameStatus, newGameSta
 
   let newFieldMapContext = newFieldMap;
   let newGameStatusContext = newGameStatus;
-
-  log(currentFieldMap.ball.column, newFieldMap.ball.column)
-  log(currentFieldMap.ball.row, newFieldMap.ball.row)
 
   // update ball position
   if (

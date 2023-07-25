@@ -1,3 +1,5 @@
+import { LOG_LEVEL } from './configs.js';
+
 const log = function () {
   if (window['log_level'] == 'debug') console.log(...arguments);
 }
