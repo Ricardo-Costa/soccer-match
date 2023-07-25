@@ -1,0 +1,58 @@
+html,
+body {
+  background-color: darkslategrey;
+}
+* {
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.full-content {
+  display: flex;
+  height: 10rem;
+  width: calc(20rem + 2px);
+  background-color: green;
+  margin: 3rem auto !important;
+}
+.field {
+  display: flex;
+  border: 1px solid white;
+  flex-grow: 1;
+  display: flex;
+  flex-wrap: wrap;
+}
+.field-col {
+  display: flex;
+  flex-direction: column;
+}
+.field-block {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  height: 1rem;
+  width: 1rem;
+  font-size: 10px;
+  color: black;
+}
+.field-block-goal {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+#field-col-c1 > div.field-block:nth-child(4),
+#field-col-c1 > div.field-block:nth-child(5),
+#field-col-c1 > div.field-block:nth-child(6),
+#field-col-c1 > div.field-block:nth-child(7),
+#field-col-c22 > div.field-block:nth-child(4),
+#field-col-c22 > div.field-block:nth-child(5),
+#field-col-c22 > div.field-block:nth-child(6),
+#field-col-c22 > div.field-block:nth-child(7) {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.field-block-blue {
+  background-color: darkblue;
+}
+.field-block-red {
+  background-color: darkred;
+}
+#field-col-c11 > div.field-block:nth-child(5) {
+  background-color: #cecece;
+}
