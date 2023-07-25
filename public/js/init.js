@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   startGame(fieldMaps, gameState);
 
-  let newFieldMap = { ...fieldMaps, ball: { column: 17, row: 6 } }, newGameStatus = { ...gameState };
+  let newFieldMap = { ...fieldMaps, ball: { column: 18, row: 6 } }, newGameStatus = { ...gameState };
   setInterval(() => {
     const result = refreshGame(
       { ...fieldMaps },

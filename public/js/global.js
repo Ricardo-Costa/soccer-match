@@ -50,88 +50,85 @@ const startGame = (fieldMaps, gameState) => {
 
 }
 
-const columnPositionToLeft = (column, skip = false) => (column - 1 - (skip ? 1 : 0 )); // move one block by time
-const columnPositionToRight = (column, skip = false) => (column + 1 + (skip ? 1 : 0 )); // move one block by time
-const rowPositionToTop = (row, skip = false) => (row - 1 - (skip ? 1 : 0 )); // move one block by time
-const rowPositionToBottom = (row, skip = false) => (row + 1 + (skip ? 1 : 0 )); // move one block by time
+const columnPositionToBottom = (column, skip = false) => (column - 1 - (skip ? 1 : 0 )); // move one block by time
+const columnPositionToTop = (column, skip = false) => (column + 1 + (skip ? 1 : 0 )); // move one block by time
+const rowPositionToLeft = (row, skip = false) => (row - 1 - (skip ? 1 : 0 )); // move one block by time
+const rowPositionToRight = (row, skip = false) => (row + 1 + (skip ? 1 : 0 )); // move one block by time
 
 const getNewBallPosition = (newGameStatusContext, currentBallPosition, newBallPosition) => {
   log(getNewBallPosition.name);
 
-  // vertical
-  if (
-    (newBallPosition.row < currentBallPosition.row) &&
-    hasPlayer(newGameStatusContext, newBallPosition.column, rowPositionToTop(newBallPosition.row))
-  ) {
+  const ballGoingToTop_ = newBallPosition.row < currentBallPosition.row;
+  const ballGoingToBottom_ = newBallPosition.row > currentBallPosition.row;
+  const ballGoingToLeft_ = newBallPosition.column < currentBallPosition.column;
+  const ballGoingToRight_ = newBallPosition.column > currentBallPosition.column;
+  const hasPlayerInTop_ = hasPlayer(newGameStatusContext, newBallPosition.column, rowPositionToLeft(newBallPosition.row));
+  const hasPlayerInBottom_ = hasPlayer(newGameStatusContext, newBallPosition.column, rowPositionToRight(newBallPosition.row));
+  const hasPlayerInLeft_ = hasPlayer(newGameStatusContext, columnPositionToBottom(newBallPosition.column), newBallPosition.row);
+  const hasPlayerInRight_ = hasPlayer(newGameStatusContext, columnPositionToTop(newBallPosition.column), newBallPosition.row);
+
+  // horizontal
+  if (ballGoingToTop_ && hasPlayerInTop_) {
     return {
-      row: rowPositionToBottom(newBallPosition.row),
+      row: rowPositionToRight(newBallPosition.row),
       column: newBallPosition.column
     }
-  } else if (
-    (newBallPosition.row > currentBallPosition.row) &&
-    hasPlayer(newGameStatusContext, newBallPosition.column, rowPositionToBottom(newBallPosition.row))
-  ) {
+  } else if (ballGoingToBottom_ && hasPlayerInBottom_) {
     return {
-      row: rowPositionToTop(newBallPosition.row),
+      row: rowPositionToLeft(newBallPosition.row),
       column: newBallPosition.column
     }
   } else if (newBallPosition.row <= FIELD_ROW_MIN_LIMIT) {
     return {
-      row: rowPositionToBottom(newBallPosition.row),
+      row: rowPositionToRight(newBallPosition.row),
       column: newBallPosition.column
     }
   } else if (newBallPosition.row >= FIELD_ROW_MAX_LIMIT) {
     return {
-      row: rowPositionToTop(newBallPosition.row),
+      row: rowPositionToLeft(newBallPosition.row),
       column: newBallPosition.column
     }
-  } else if (newBallPosition.row < currentBallPosition.row) {
+  } else if (ballGoingToTop_) {
     return {
-      row: rowPositionToTop(newBallPosition.row),
+      row: rowPositionToLeft(newBallPosition.row),
       column: newBallPosition.column
     }
-  } else if (newBallPosition.row > currentBallPosition.row) {
+  } else if (ballGoingToBottom_) {
     return {
-      row: rowPositionToBottom(newBallPosition.row),
+      row: rowPositionToRight(newBallPosition.row),
       column: newBallPosition.column
     }
   }
   
-  // horizontal
-  else if (
-    (newBallPosition.column < currentBallPosition.column) &&
-    hasPlayer(newGameStatusContext, columnPositionToLeft(newBallPosition.column), newBallPosition.row)
-  ) {
+  // vertical
+  else if (ballGoingToLeft_ && hasPlayerInLeft_) {
     return {
       row: newBallPosition.row,
-      column: columnPositionToRight(newBallPosition.column)
+      column: columnPositionToTop(newBallPosition.column)
     }
-  } else if (
-    (newBallPosition.column > currentBallPosition.column) &&
-    hasPlayer(newGameStatusContext, columnPositionToRight(newBallPosition.column), newBallPosition.row)
-  ) {
+  } else if (ballGoingToRight_ && hasPlayerInRight_) {
     return {
       row: newBallPosition.row,
-      column: columnPositionToLeft(newBallPosition.column)
+      column: columnPositionToBottom(newBallPosition.column)
     }
   } else if (newBallPosition.column <= FIELD_COLUMN_MIN_LIMIT) {
     return {
-      column: columnPositionToRight(newBallPosition.column),
+      column: columnPositionToTop(newBallPosition.column),
       row: newBallPosition.row
     }
   } else if (newBallPosition.column >= FIELD_COLUMN_MAX_LIMIT) {
     return {
-      column: columnPositionToLeft(newBallPosition.column),
+      column: columnPositionToBottom(newBallPosition.column),
       row: newBallPosition.row
     }
-  } else if (newBallPosition.column < currentBallPosition.column) {
+  } else if (ballGoingToLeft_) {
     return {
-      column: columnPositionToLeft(newBallPosition.column),
+      column: columnPositionToBottom(newBallPosition.column),
       row: newBallPosition.row
     }
-  } else if (newBallPosition.column > currentBallPosition.column) {
+  } else if (ballGoingToRight_) {
     return {
-      column: columnPositionToRight(newBallPosition.column),
+      column: columnPositionToTop(newBallPosition.column),
       row: newBallPosition.row
     }
   } else {
