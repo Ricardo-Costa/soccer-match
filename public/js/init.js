@@ -20,10 +20,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       { position: { column: 18, row: 9 }, name: 'Didier Drogba', team: 'red' },
       { position: { column: 8, row: 6 }, name: 'Pelé', team: 'blue' },
       { position: { column: 8, row: 3 }, name: 'Cristiano Ronaldo', team: 'blue' },
-      { position: { column: 9, row: 8 }, name: 'Messi', team: 'blue' },
-      { position: { column: 12, row: 6 }, name: 'Neymar', team: 'blue' },
+      { position: { column: 9, row: 9 }, name: 'Messi', team: 'blue' },
+      { position: { column: 12, row: 3 }, name: 'Neymar', team: 'blue' },
       { position: { column: 14, row: 7 }, name: 'Ronaldinho', team: 'blue' },
-      { position: { column: 18, row: 6 }, name: 'Ronaldo', team: 'blue' }
+      { position: { column: 17, row: 6 }, name: 'Ronaldo', team: 'blue' }
     ]
   };
 
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   startGame(fieldMaps, gameState);
 
-  let newFieldMap = { ...fieldMaps, ball: { column: 18, row: 6 } }, newGameStatus = { ...gameState };
+  let newFieldMap = { ...fieldMaps, ball: { column: 17, row: 5 } }, newGameStatus = { ...gameState };
   setInterval(() => {
     const result = refreshGame(
       { ...fieldMaps },
