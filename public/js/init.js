@@ -2,75 +2,71 @@ import { startGame, refreshGame } from './global.js';
 import {
   FIELD_COLUMN_MAX_LIMIT,
   FIELD_ROW_MAX_LIMIT,
-  LOG_LEVEL
+  LOG_LEVEL,
+  ACTION_STOPPED,
+  ACTION_TOP,
+  ACTION_RIGHT,
+  ACTION_LEFT,
+  ACTION_BOTTOM,
+  TEAMS,
 } from './configs.js';
+import PositionModel from './models/PositionModel.js';
+import PlayerModel from './models/PlayerModel.js';
+import GameStateModel from './models/GameStateModel.js';
+import FieldMapsModel from './models/FieldMapsModel.js';
+import BallModel from './models/BallModel.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
 
   window['log_level'] = LOG_LEVEL;
 
-  let gameState = {
-    players: [
-      { position: { column: 3, row: 6 }, name: 'Thiago Silva', team: 'red' },
-      { position: { column: 4, row: 3 }, name: 'Sergio Ramos', team: 'red' },
-      { position: { column: 10, row: 2 }, name: 'Hulk', team: 'red' },
-      { position: { column: 6, row: 9 }, name: 'Adriano', team: 'red' },
-      { position: { column: 6, row: 6 }, name: 'Ibrahimović', team: 'red' },
-      { position: { column: 18, row: 9 }, name: 'Didier Drogba', team: 'red' },
-      { position: { column: 8, row: 6 }, name: 'Pelé', team: 'blue' },
-      { position: { column: 8, row: 3 }, name: 'Cristiano Ronaldo', team: 'blue' },
-      { position: { column: 9, row: 9 }, name: 'Messi', team: 'blue' },
-      { position: { column: 12, row: 3 }, name: 'Neymar', team: 'blue' },
-      { position: { column: 14, row: 7 }, name: 'Ronaldinho', team: 'blue' },
-      { position: { column: 17, row: 6 }, name: 'Ronaldo', team: 'blue' }
-    ]
-  };
+  let gameState = new GameStateModel([
+    new PlayerModel('Thiago Silva', new PositionModel(3, 6, [ACTION_STOPPED]), TEAMS.RED),
+    new PlayerModel('Sergio Ramos', new PositionModel(4, 3, [ACTION_STOPPED]), TEAMS.RED),
+    new PlayerModel('Hulk', new PositionModel(10, 2, [ACTION_STOPPED]), TEAMS.RED),
+    new PlayerModel('Adriano', new PositionModel(6, 9, [ACTION_STOPPED]), TEAMS.RED),
+    new PlayerModel('Ibrahimović', new PositionModel(6, 6, [ACTION_STOPPED]), TEAMS.RED),
+    new PlayerModel('Didier Drogba', new PositionModel(18, 9, [ACTION_STOPPED]), TEAMS.RED),
+    new PlayerModel('Pelé', new PositionModel(8, 6, [ACTION_STOPPED]), TEAMS.BLUE),
+    new PlayerModel('Cristiano Ronaldo', new PositionModel(8, 3, [ACTION_STOPPED]), TEAMS.BLUE),
+    new PlayerModel('Messi', new PositionModel(9, 9, [ACTION_STOPPED]), TEAMS.BLUE),
+    new PlayerModel('Neymar', new PositionModel(12, 3, [ACTION_STOPPED]), TEAMS.BLUE),
+    new PlayerModel('Ronaldinho', new PositionModel(14, 7, [ACTION_STOPPED]), TEAMS.BLUE),
+    new PlayerModel('Ronaldo', new PositionModel(17, 6, [ACTION_STOPPED]), TEAMS.BLUE),
+  ]);
 
-  let fieldMaps = {
-    columns: FIELD_COLUMN_MAX_LIMIT,
-    rows: FIELD_ROW_MAX_LIMIT,
-    goalLeft: [
-      { column: 1, row: 4 },
-      { column: 1, row: 5 },
-      { column: 1, row: 6 },
-      { column: 1, row: 7 }
+  let fieldMaps = new FieldMapsModel(
+    FIELD_COLUMN_MAX_LIMIT,
+    FIELD_ROW_MAX_LIMIT, [
+      new PositionModel(1, 4, [ACTION_STOPPED]),
+      new PositionModel(1, 5, [ACTION_STOPPED]),
+      new PositionModel(1, 6, [ACTION_STOPPED]),
+      new PositionModel(1, 7, [ACTION_STOPPED])
+    ], [
+      new PositionModel(20, 4, [ACTION_STOPPED]),
+      new PositionModel(20, 5, [ACTION_STOPPED]),
+      new PositionModel(20, 6, [ACTION_STOPPED]),
+      new PositionModel(20, 7, [ACTION_STOPPED])
     ],
-    goalRight: [
-      { column: 20, row: 4 },
-      { column: 20, row: 5 },
-      { column: 20, row: 6 },
-      { column: 20, row: 7 }
-    ],
-    ball: { column: 16, row: 6 }
-  };
+    new BallModel(
+      null,
+      new PositionModel(16, 6, [ACTION_STOPPED])
+    )
+  );
 
   startGame(fieldMaps, gameState);
 
-  let newFieldMap = { ...fieldMaps, ball: { column: 17, row: 5 } }, newGameStatus = { ...gameState };
+  let TEMP_COUNTER = 10;
+  while(TEMP_COUNTER) {
 
-  while(true) {
-    const result = await refreshGame(
-      { ...fieldMaps },
-      { ...newFieldMap },
-      { ...gameState },
-      { ...newGameStatus }
-    );
-    fieldMaps = { ...newFieldMap };
-    gameState = { ...newGameStatus };
-    newFieldMap = { ...result.newFieldMap };
-    newGameStatus = { ...result.newGameStatus };
+    // TODO movimentação da bola
+    fieldMaps.ball.whoKicked = gameState.players[4];
+    fieldMaps.ball.position.action = [ ACTION_TOP, ACTION_RIGHT ];
+
+    const { newFieldMaps, newGameState } = await refreshGame(fieldMaps, gameState);
+    gameState = newGameState;
+    fieldMaps = newFieldMaps;
+
+    TEMP_COUNTER--;
   }
-
-  // setInterval(async () => {
-  //   const result = await refreshGame(
-  //     { ...fieldMaps },
-  //     { ...newFieldMap },
-  //     { ...gameState },
-  //     { ...newGameStatus }
-  //   );
-  //   fieldMaps = { ...newFieldMap };
-  //   gameState = { ...newGameStatus };
-  //   newFieldMap = { ...result.newFieldMap };
-  //   newGameStatus = { ...result.newGameStatus };
-  // }, RENDER_INTERVAL);
 });
