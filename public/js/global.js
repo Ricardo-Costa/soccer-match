@@ -1,5 +1,6 @@
 import {
   log,
+  sleep,
   addToField,
   clearField,
   formatBlockID,
@@ -14,7 +15,8 @@ import {
   FIELD_COLUMN_MAX_LIMIT,
   FIELD_COLUMN_MIN_LIMIT,
   FIELD_ROW_MAX_LIMIT,
-  FIELD_ROW_MIN_LIMIT
+  FIELD_ROW_MIN_LIMIT,
+  RENDER_INTERVAL
 } from './configs.js';
 
 const startGame = (fieldMaps, gameState) => {
@@ -55,8 +57,10 @@ const columnPositionToRight = (column, skip = false) => (column + 1 + (skip ? 1 
 const rowPositionToTop = (row, skip = false) => (row - 1 - (skip ? 1 : 0 )); // move one block by time
 const rowPositionToBottom = (row, skip = false) => (row + 1 + (skip ? 1 : 0 )); // move one block by time
 
-const getNewBallPosition = (newGameStatusContext, currentBallPosition, newBallPosition) => {
+const getNewBallPosition = async (newFieldMap, newGameStatusContext, currentBallPosition, newBallPosition) => {
   log(getNewBallPosition.name);
+
+  console.log(`c${newBallPosition.column}-r${currentBallPosition.row}`)
 
   const fieldLimitInTop = newBallPosition.row <= FIELD_ROW_MIN_LIMIT;
   const fieldLimitInBottom = newBallPosition.row >= FIELD_ROW_MAX_LIMIT;
@@ -83,299 +87,304 @@ const getNewBallPosition = (newGameStatusContext, currentBallPosition, newBallPo
   const hasPlayerInBottomLeft_ = hasPlayer(newGameStatusContext, columnPositionToLeft(newBallPosition.column), rowPositionToBottom(newBallPosition.row));
   const hasPlayerInBottomRight_ = hasPlayer(newGameStatusContext, columnPositionToRight(newBallPosition.column), rowPositionToBottom(newBallPosition.row));
 
-  const treatCollision = ({ column, row }) => {
+  const hasObjectInLeft = () => (fieldLimitInLeft || hasPlayerInLeft_);
+  const hasObjectInTopLeft = () => ((fieldLimitInTop && fieldLimitInLeft) || hasPlayerInTopLeft_);
+  const hasObjectInTop = () => (fieldLimitInTop || hasPlayerInTop_);
+  const hasObjectInTopRight = () => ((fieldLimitInTop && fieldLimitInRight) || hasPlayerInTopRight_);
+  const hasObjectInRight = () => (fieldLimitInRight || hasPlayerInRight_);
+  const hasObjectInBottomLeft = () => ((fieldLimitInBottom && fieldLimitInLeft) || hasPlayerInBottomLeft_);
+  const hasObjectInBottom = () => (fieldLimitInBottom || hasPlayerInBottom_);
+  const hasObjectInBottomRight = () => ((fieldLimitInBottom && fieldLimitInRight) || hasPlayerInBottomRight_);
 
-    const fieldLimitInTop = row <= FIELD_ROW_MIN_LIMIT;
-    const fieldLimitInBottom = row >= FIELD_ROW_MAX_LIMIT;
-    const fieldLimitInLeft = column <= FIELD_COLUMN_MIN_LIMIT;
-    const fieldLimitInRight = column >= FIELD_COLUMN_MAX_LIMIT;
-  
-    const ballGoingToTop_ = row < newBallPosition.row && column == newBallPosition.column;
-    const ballGoingToBottom_ = row > newBallPosition.row && column == newBallPosition.column;
-    const ballGoingToLeft_ = column < newBallPosition.column && row == newBallPosition.row;
-    const ballGoingToRight_ = column > newBallPosition.column && row == newBallPosition.row;
-  
-    const ballGoingToTopLeft_ = row < newBallPosition.row && column < newBallPosition.column;
-    const ballGoingToTopRight_ = row < newBallPosition.row && column > newBallPosition.column;
-    const ballGoingToBottomLeft_ = row > newBallPosition.row && column < newBallPosition.column;
-    const ballGoingToBottomRight_ = row > newBallPosition.row && column > newBallPosition.column;
+  const showBallHtmlElement = async (currentBallPosition, newBallPosition) => {
+    const el = document.getElementById(formatBlockID(
+      currentBallPosition.column,
+      currentBallPosition.row
+    ));
+    if (!el) return;
 
-    const hasPlayer_ = hasPlayer(newGameStatusContext, column, row);
+    const targetEl = document.getElementById(formatBlockID(
+      newBallPosition.column,
+      newBallPosition.row
+    ));
+    if (!targetEl) return;
 
-    // TODO resolver aqui
-    // // collision in to ballGoingToTopLeft_
-    // if (hasPlayer_ && ballGoingToTopLeft_ && ( !fieldLimitInBottom && !fieldLimitInRight )) {
-    //   return { column: columnPositionToRight(column, true), row: rowPositionToBottom(row, true) }
-    // }
-    // // collision in to ballGoingToTopRight_
-    // else if (hasPlayer_ && ballGoingToTopRight_ && ( !fieldLimitInBottom && !fieldLimitInLeft )) {
-    //   return { column: columnPositionToLeft(column, true), row: rowPositionToBottom(row, true) }
-    // }
-    // // collision in to ballGoingToBottomLeft_
-    // else if (hasPlayer_ && ballGoingToBottomLeft_ && ( !fieldLimitInTop && !fieldLimitInRight )) {
-    //   return { column: columnPositionToRight(column, true), row: rowPositionToTop(row, true) }
-    // }
-    // // collision in to ballGoingToBottomRight_
-    // else if (hasPlayer_ && ballGoingToBottomRight_ && ( !fieldLimitInTop && !fieldLimitInLeft )) {
-    //   return { column: columnPositionToLeft(column, true), row: rowPositionToTop(row, true) }
-    // }
-    // // collision in to Top
-    // else if (hasPlayer_ && ballGoingToTop_ && !fieldLimitInBottom) {
-    //   return { column, row: rowPositionToBottom(row, true) }
-    // }
-    // // collision in to bottom
-    // else if (hasPlayer_ && ballGoingToBottom_ && !fieldLimitInTop) {
-    //   return { column, row: rowPositionToTop(row, true) }
-    // }
-    // // collision in to left
-    // else if (hasPlayer_ && ballGoingToLeft_ && !fieldLimitInRight) {
-    //   return { column: columnPositionToRight(column, true), row }
-    // }
-    // // collision in to right
-    // else if (hasPlayer_ && ballGoingToRight_ && !fieldLimitInLeft) {
-    //   return { column: columnPositionToLeft(column, true), row }
-    // }
-    // else if (fieldLimitInTop) {
-    //   return { column, row: rowPositionToBottom(row, true) }
-    // }
-    // else if (fieldLimitInBottom) {
-    //   return { column, row: rowPositionToTop(row, true) }
-    // }
-    // else if (fieldLimitInRight) {
-    //   return { column: columnPositionToLeft(column, true), row }
-    // }
-    // else if (fieldLimitInLeft) {
-    //   return { column: columnPositionToRight(column, true), row }
-    // }
+    removeFromHtmlClasses(
+      el.className,
+      'field-block-ball',
+      el
+    );
+    addToHtmlClasses(
+      targetEl.className,
+      'field-block-ball',
+      targetEl
+    );
 
-    return { column, row }
-  };
+    await sleep(RENDER_INTERVAL);
+  }
 
   // diagonal BOTTOM-RIGHT
-  if (ballGoingToBottomRight_ && hasPlayerInRight_) {
-    return treatCollision({
+  if (ballGoingToBottomRight_ && hasObjectInRight()) {
+    await showBallHtmlElement(newBallPosition, {
       row: rowPositionToBottom(newBallPosition.row),
       column: columnPositionToLeft(newBallPosition.column)
     });
-  } else if (ballGoingToBottomRight_ && hasPlayerInBottom_) {
-    return treatCollision({
-      row: rowPositionToTop(newBallPosition.row),
-      column: columnPositionToRight(newBallPosition.column)
-    });
-  } else if (ballGoingToBottomRight_ && hasPlayerInBottomRight_) {
-    return treatCollision({
-      row: rowPositionToTop(newBallPosition.row),
-      column: columnPositionToLeft(newBallPosition.column)
-    });
-  } else if (ballGoingToBottomRight_ && fieldLimitInBottom && fieldLimitInRight) {
-    return treatCollision({
-      row: rowPositionToTop(newBallPosition.row),
-      column: columnPositionToLeft(newBallPosition.column)
-    });
-  } else if (ballGoingToBottomRight_ && fieldLimitInBottom) {
-    return treatCollision({
-      row: rowPositionToTop(newBallPosition.row),
-      column: columnPositionToRight(newBallPosition.column)
-    });
-  } else if (ballGoingToBottomRight_ && fieldLimitInRight) {
-    return treatCollision({
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
       row: rowPositionToBottom(newBallPosition.row),
       column: columnPositionToLeft(newBallPosition.column)
     });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
+  } else if (ballGoingToBottomRight_ && hasObjectInBottom()) {
+    await showBallHtmlElement(newBallPosition, {
+      row: rowPositionToTop(newBallPosition.row),
+      column: columnPositionToRight(newBallPosition.column)
+    });
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
+      row: rowPositionToTop(newBallPosition.row),
+      column: columnPositionToRight(newBallPosition.column)
+    });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
+  } else if (ballGoingToBottomRight_ && hasObjectInBottomRight()) {
+    await showBallHtmlElement(newBallPosition, {
+      row: rowPositionToTop(newBallPosition.row),
+      column: columnPositionToLeft(newBallPosition.column)
+    });
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
+      row: rowPositionToTop(newBallPosition.row),
+      column: columnPositionToLeft(newBallPosition.column)
+    });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
   } else if (ballGoingToBottomRight_) {
-    return treatCollision({
+    const nextBallPosition = ({
       row: rowPositionToBottom(newBallPosition.row),
       column: columnPositionToRight(newBallPosition.column)
     });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
   }
 
   // diagonal BOTTOM-LEFT
-  else if (ballGoingToBottomLeft_ && hasPlayerInLeft_) {
-    return treatCollision({
+  else if (ballGoingToBottomLeft_ && hasObjectInLeft()) {
+    await showBallHtmlElement(newBallPosition, {
       row: rowPositionToBottom(newBallPosition.row),
       column: columnPositionToRight(newBallPosition.column)
     });
-  } else if (ballGoingToBottomLeft_ && hasPlayerInBottom_) {
-    return treatCollision({
-      row: rowPositionToTop(newBallPosition.row),
-      column: columnPositionToLeft(newBallPosition.column)
-    });
-  } else if (ballGoingToBottomLeft_ && hasPlayerInBottomLeft_) {
-    return treatCollision({
-      row: rowPositionToTop(newBallPosition.row),
-      column: columnPositionToRight(newBallPosition.column)
-    });
-  } else if (ballGoingToBottomLeft_ && fieldLimitInBottom && fieldLimitInLeft) {
-    return treatCollision({
-      row: rowPositionToTop(newBallPosition.row),
-      column: columnPositionToRight(newBallPosition.column)
-    });
-  } else if (ballGoingToBottomLeft_ && fieldLimitInBottom) {
-    return treatCollision({
-      row: rowPositionToTop(newBallPosition.row),
-      column: columnPositionToLeft(newBallPosition.column)
-    });
-  } else if (ballGoingToBottomLeft_ && fieldLimitInLeft) {
-    return treatCollision({
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
       row: rowPositionToBottom(newBallPosition.row),
       column: columnPositionToRight(newBallPosition.column)
     });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
+  } else if (ballGoingToBottomLeft_ && hasObjectInBottom()) {
+    await showBallHtmlElement(newBallPosition, {
+      row: rowPositionToTop(newBallPosition.row),
+      column: columnPositionToLeft(newBallPosition.column)
+    });
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
+      row: rowPositionToTop(newBallPosition.row),
+      column: columnPositionToLeft(newBallPosition.column)
+    });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
+  } else if (ballGoingToBottomLeft_ && hasObjectInBottomLeft()) {
+    await showBallHtmlElement(newBallPosition, {
+      row: rowPositionToTop(newBallPosition.row),
+      column: columnPositionToRight(newBallPosition.column)
+    });
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
+      row: rowPositionToTop(newBallPosition.row),
+      column: columnPositionToRight(newBallPosition.column)
+    });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
   } else if (ballGoingToBottomLeft_) {
-    return treatCollision({
+    const nextBallPosition = ({
       row: rowPositionToBottom(newBallPosition.row),
       column: columnPositionToLeft(newBallPosition.column)
     });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
   }
 
   // diagonal TOP-RIGHT
-  if (ballGoingToTopRight_ && hasPlayerInRight_) {
-    return treatCollision({
-      row: rowPositionToTop(newBallPosition.row),
-      column: columnPositionToRight(newBallPosition.column)
-    });
-  } else if (ballGoingToTopRight_ && hasPlayerInTop_) {
-    return treatCollision({
-      row: rowPositionToBottom(newBallPosition.row),
-      column: columnPositionToRight(newBallPosition.column)
-    });
-  } else if (ballGoingToTopRight_ && hasPlayerInTopRight_) {
-    return treatCollision({
-      row: rowPositionToBottom(newBallPosition.row),
-      column: columnPositionToRight(newBallPosition.column)
-    });
-  } else if (ballGoingToTopRight_ && fieldLimitInTop && fieldLimitInRight) {
-    return treatCollision({
-      row: rowPositionToBottom(newBallPosition.row),
-      column: columnPositionToLeft(newBallPosition.column)
-    });
-  } else if (ballGoingToTopRight_ && fieldLimitInTop) {
-    return treatCollision({
-      row: rowPositionToBottom(newBallPosition.row),
-      column: columnPositionToRight(newBallPosition.column)
-    });
-  } else if (ballGoingToTopRight_ && fieldLimitInRight) {
-    return treatCollision({
+  if (ballGoingToTopRight_ && hasObjectInRight()) {
+    await showBallHtmlElement(newBallPosition, {
       row: rowPositionToTop(newBallPosition.row),
       column: columnPositionToLeft(newBallPosition.column)
     });
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
+      row: rowPositionToTop(newBallPosition.row),
+      column: columnPositionToLeft(newBallPosition.column)
+    });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
+  } else if (ballGoingToTopRight_ && hasObjectInTop()) {
+    await showBallHtmlElement(newBallPosition, {
+      row: rowPositionToBottom(newBallPosition.row),
+      column: columnPositionToRight(newBallPosition.column)
+    });
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
+      row: rowPositionToBottom(newBallPosition.row),
+      column: columnPositionToRight(newBallPosition.column)
+    });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
+  } else if (ballGoingToTopRight_ && hasObjectInTopRight()) {
+    await showBallHtmlElement(newBallPosition, {
+      row: rowPositionToBottom(newBallPosition.row),
+      column: columnPositionToLeft(newBallPosition.column)
+    });
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
+      row: rowPositionToBottom(newBallPosition.row),
+      column: columnPositionToLeft(newBallPosition.column)
+    });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
   } else if (ballGoingToTopRight_) {
-    return treatCollision({
+    const nextBallPosition = ({
       row: rowPositionToTop(newBallPosition.row),
       column: columnPositionToRight(newBallPosition.column)
     });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
   }
 
   // diagonal TOP-LEFT
-  else if (ballGoingToTopLeft_ && hasPlayerInLeft_) {
-    return treatCollision({
+  else if (ballGoingToTopLeft_ && hasObjectInLeft()) {
+    await showBallHtmlElement(newBallPosition, {
       row: rowPositionToTop(newBallPosition.row),
       column: columnPositionToRight(newBallPosition.column)
     });
-  } else if (ballGoingToTopLeft_ && hasPlayerInTop_) {
-    return treatCollision({
-      row: rowPositionToBottom(newBallPosition.row),
-      column: columnPositionToLeft(newBallPosition.column)
-    });
-  } else if (ballGoingToTopLeft_ && hasPlayerInTopLeft_) {
-    return treatCollision({
-      row: rowPositionToBottom(newBallPosition.row),
-      column: columnPositionToRight(newBallPosition.column)
-    });
-  } else if (ballGoingToTopLeft_ && fieldLimitInTop && fieldLimitInLeft) {
-    return treatCollision({
-      row: rowPositionToBottom(newBallPosition.row),
-      column: columnPositionToRight(newBallPosition.column)
-    });
-  } else if (ballGoingToTopLeft_ && fieldLimitInTop) {
-    return treatCollision({
-      row: rowPositionToBottom(newBallPosition.row),
-      column: columnPositionToLeft(newBallPosition.column)
-    });
-  } else if (ballGoingToTopLeft_ && fieldLimitInLeft) {
-    return treatCollision({
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
       row: rowPositionToTop(newBallPosition.row),
       column: columnPositionToRight(newBallPosition.column)
     });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
+  } else if (ballGoingToTopLeft_ && hasObjectInTop()) {
+    await showBallHtmlElement(newBallPosition, {
+      row: rowPositionToBottom(newBallPosition.row),
+      column: columnPositionToLeft(newBallPosition.column)
+    });
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
+      row: rowPositionToBottom(newBallPosition.row),
+      column: columnPositionToLeft(newBallPosition.column)
+    });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
+  } else if (ballGoingToTopLeft_ && hasObjectInTopLeft()) {
+    await showBallHtmlElement(newBallPosition, {
+      row: rowPositionToBottom(newBallPosition.row),
+      column: columnPositionToRight(newBallPosition.column)
+    });
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
+      row: rowPositionToBottom(newBallPosition.row),
+      column: columnPositionToRight(newBallPosition.column)
+    });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
   } else if (ballGoingToTopLeft_) {
-    return treatCollision({
+    const nextBallPosition = ({
       row: rowPositionToTop(newBallPosition.row),
       column: columnPositionToLeft(newBallPosition.column)
     });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
   }
 
   // horizontal
-  if (ballGoingToTop_ && hasPlayerInTop_) {
-    return treatCollision({
+  if (ballGoingToTop_ && hasObjectInTop()) {
+    await showBallHtmlElement(newBallPosition, {
       row: rowPositionToBottom(newBallPosition.row),
       column: newBallPosition.column
     });
-  } else if (ballGoingToBottom_ && hasPlayerInBottom_) {
-    return treatCollision({
-      row: rowPositionToTop(newBallPosition.row),
-      column: newBallPosition.column
-    });
-  } else if (fieldLimitInTop) {
-    return treatCollision({
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
       row: rowPositionToBottom(newBallPosition.row),
       column: newBallPosition.column
     });
-  } else if (fieldLimitInBottom) {
-    return treatCollision({
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
+  } else if (ballGoingToBottom_ && hasObjectInBottom()) {
+    await showBallHtmlElement(newBallPosition, {
       row: rowPositionToTop(newBallPosition.row),
       column: newBallPosition.column
     });
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
+      row: rowPositionToTop(newBallPosition.row),
+      column: newBallPosition.column
+    });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
   } else if (ballGoingToTop_) {
-    return treatCollision({
+    const nextBallPosition = ({
       row: rowPositionToTop(newBallPosition.row),
       column: newBallPosition.column
     });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
   } else if (ballGoingToBottom_) {
-    return treatCollision({
+    const nextBallPosition = ({
       row: rowPositionToBottom(newBallPosition.row),
       column: newBallPosition.column
     });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
   }
   
   // vertical
-  else if (ballGoingToLeft_ && hasPlayerInLeft_) {
-    return treatCollision({
+  else if (ballGoingToLeft_ && hasObjectInLeft()) {
+    await showBallHtmlElement(newBallPosition, {
       row: newBallPosition.row,
       column: columnPositionToRight(newBallPosition.column)
     });
-  } else if (ballGoingToRight_ && hasPlayerInRight_) {
-    return treatCollision({
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
+      row: newBallPosition.row,
+      column: columnPositionToRight(newBallPosition.column)
+    });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
+  } else if (ballGoingToRight_ && hasObjectInRight()) {
+    await showBallHtmlElement(newBallPosition, {
       row: newBallPosition.row,
       column: columnPositionToLeft(newBallPosition.column)
     });
-  } else if (fieldLimitInLeft) {
-    return treatCollision({
-      column: columnPositionToRight(newBallPosition.column),
-      row: newBallPosition.row
+    const nextBallPosition = await getNewBallPosition(newFieldMap, newGameStatusContext, newBallPosition, {
+      row: newBallPosition.row,
+      column: columnPositionToLeft(newBallPosition.column)
     });
-  } else if (fieldLimitInRight) {
-    return treatCollision({
-      column: columnPositionToLeft(newBallPosition.column),
-      row: newBallPosition.row
-    });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
   } else if (ballGoingToLeft_) {
-    return treatCollision({
+    const nextBallPosition = ({
       column: columnPositionToLeft(newBallPosition.column),
       row: newBallPosition.row
     });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
   } else if (ballGoingToRight_) {
-    return treatCollision({
+    const nextBallPosition = ({
       column: columnPositionToRight(newBallPosition.column),
       row: newBallPosition.row
     });
-  } else {
-    return treatCollision({
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
+  }
+  
+  // default
+  else {
+    const nextBallPosition = ({
       column: newBallPosition.column,
       row: newBallPosition.row
     });
+    await showBallHtmlElement(newBallPosition, nextBallPosition);
+    return nextBallPosition;
   }
 }
 
-const refreshGame = (currentFieldMap, newFieldMap, currentGameStatus, newGameStatus) => {
+const refreshGame = async (currentFieldMap, newFieldMap, currentGameStatus, newGameStatus) => {
   log(refreshGame.name);
 
   let newFieldMapContext = newFieldMap;
@@ -388,26 +397,8 @@ const refreshGame = (currentFieldMap, newFieldMap, currentGameStatus, newGameSta
   ) {
     log('update ball position...');
 
-    const el = document.getElementById(formatBlockID(
-      currentFieldMap.ball.column,
-      currentFieldMap.ball.row
-    ));
-    const targetEl = document.getElementById(formatBlockID(
-      newFieldMap.ball.column,
-      newFieldMap.ball.row
-    ));
-    removeFromHtmlClasses(
-      el.className,
-      'field-block-ball',
-      el
-    );
-    addToHtmlClasses(
-      targetEl.className,
-      'field-block-ball',
-      targetEl
-    );
-
-    newFieldMapContext.ball = getNewBallPosition(
+    newFieldMapContext.ball = await getNewBallPosition(
+      newFieldMap,
       newGameStatusContext,
       currentFieldMap.ball,
       newFieldMap.ball

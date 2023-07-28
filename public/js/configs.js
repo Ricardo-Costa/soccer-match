@@ -1,6 +1,6 @@
-const RENDER_INTERVAL = 100; // ms
+const RENDER_INTERVAL = 500; // ms
 
-const LOG_LEVEL = 'debug';
+const LOG_LEVEL = 'none';// none|debug
 
 const FIELD_COLUMN_MIN_LIMIT = 1;
 const FIELD_COLUMN_MAX_LIMIT = 20;

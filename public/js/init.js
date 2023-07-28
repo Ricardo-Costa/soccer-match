@@ -2,8 +2,7 @@ import { startGame, refreshGame } from './global.js';
 import {
   FIELD_COLUMN_MAX_LIMIT,
   FIELD_ROW_MAX_LIMIT,
-  LOG_LEVEL,
-  RENDER_INTERVAL
+  LOG_LEVEL
 } from './configs.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -48,8 +47,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   startGame(fieldMaps, gameState);
 
   let newFieldMap = { ...fieldMaps, ball: { column: 17, row: 5 } }, newGameStatus = { ...gameState };
-  setInterval(() => {
-    const result = refreshGame(
+
+  while(true) {
+    const result = await refreshGame(
       { ...fieldMaps },
       { ...newFieldMap },
       { ...gameState },
@@ -59,5 +59,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     gameState = { ...newGameStatus };
     newFieldMap = { ...result.newFieldMap };
     newGameStatus = { ...result.newGameStatus };
-  }, RENDER_INTERVAL);
+  }
+
+  // setInterval(async () => {
+  //   const result = await refreshGame(
+  //     { ...fieldMaps },
+  //     { ...newFieldMap },
+  //     { ...gameState },
+  //     { ...newGameStatus }
+  //   );
+  //   fieldMaps = { ...newFieldMap };
+  //   gameState = { ...newGameStatus };
+  //   newFieldMap = { ...result.newFieldMap };
+  //   newGameStatus = { ...result.newGameStatus };
+  // }, RENDER_INTERVAL);
 });

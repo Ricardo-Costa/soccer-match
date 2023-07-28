@@ -34,8 +34,10 @@ const isBallBlock = (fieldMaps, column, row) => {
 const removeFromHtmlClasses = (htmlClasses, targetClass, htmlEl) => {
   let classes = htmlClasses.split(" ");
   const index = classes.indexOf(targetClass);
-  classes.splice(index, 1);
-  htmlEl.className = classes.join(" ");
+  if (index >= 0) {
+    classes.splice(index, 1);
+    htmlEl.className = classes.join(" ");
+  }
 }
 
 const addToHtmlClasses = (htmlClasses, targetClass, htmlEl) => {
@@ -49,8 +51,13 @@ const hasHtmlClasses = (htmlClasses, targetClass) => {
   return classes.includes(targetClass);
 }
 
+const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export {
   log,
+  sleep,
   addToField,
   clearField,
   formatBlockID,
