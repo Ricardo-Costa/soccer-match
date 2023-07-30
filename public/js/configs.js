@@ -1,6 +1,6 @@
 const RENDER_INTERVAL = 500; // ms
 
-const LOG_LEVEL = 'debug';// none|debug
+const LOG_LEVEL = 'none';// none|debug
 
 const MAX_ACCEPTED_RECURSIVE_CALLS = 10;
 

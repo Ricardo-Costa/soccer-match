@@ -27,25 +27,40 @@ import PositionModel from './models/PositionModel.js';
  * @param {boolean} skip 
  * @returns {number}
  */
-const columnPositionToLeft = (column, skip = false) => (column - 1 - (skip ? 1 : 0 ));
+const columnPositionToLeft = (column) => {
+  if (column - 1 < FIELD_COLUMN_MIN_LIMIT) return column;
+  return (column - 1);
+};
+
 /**
  * @param {number} column 
  * @param {boolean} skip 
  * @returns {number}
  */
-const columnPositionToRight = (column, skip = false) => (column + 1 + (skip ? 1 : 0 ));
+const columnPositionToRight = (column) => {
+  if (column + 1 > FIELD_COLUMN_MAX_LIMIT) return column;
+  return (column + 1);
+};
+
 /**
  * @param {number} column 
  * @param {boolean} skip 
  * @returns {number}
  */
-const rowPositionToTop = (row, skip = false) => (row - 1 - (skip ? 1 : 0 ));
+const rowPositionToTop = (row) => {
+  if (row - 1 < FIELD_ROW_MIN_LIMIT) return row;
+  return (row - 1);
+};
+
 /**
  * @param {number} column 
  * @param {boolean} skip 
  * @returns {number}
  */
-const rowPositionToBottom = (row, skip = false) => (row + 1 + (skip ? 1 : 0 ));
+const rowPositionToBottom = (row) => {
+  if (row + 1 > FIELD_ROW_MAX_LIMIT) return row;
+  return (row + 1);
+};
 
 /**
  * Predict the new position that the ball will go.
@@ -55,6 +70,17 @@ const rowPositionToBottom = (row, skip = false) => (row + 1 + (skip ? 1 : 0 ));
  * @returns {PositionModel}
  */
 const predictNewBallPosition = (currentBallPosition) => {
+
+  if (
+    currentBallPosition.row < FIELD_ROW_MIN_LIMIT ||
+    currentBallPosition.row > FIELD_ROW_MAX_LIMIT ||
+    currentBallPosition.column < FIELD_COLUMN_MIN_LIMIT ||
+    currentBallPosition.column > FIELD_COLUMN_MAX_LIMIT
+  ) {
+    // no should to change current position
+    return currentBallPosition;
+  }
+
   if (
     currentBallPosition.action.includes(ACTION_BOTTOM) &&
     currentBallPosition.action.includes(ACTION_RIGHT)
@@ -126,25 +152,28 @@ let getNewBallPositionMethodCounter = 0;
 const getNewBallPosition = async (fieldMaps, gameState, newBallPosition) => {
   log(getNewBallPosition.name);
 
+  console.log(`${newBallPosition.action.join(' ')} --> c${newBallPosition.column}r${newBallPosition.row}`)
+
   getNewBallPositionMethodCounter++;
-  if (getNewBallPositionMethodCounter >= MAX_ACCEPTED_RECURSIVE_CALLS) throw Error('Max recursive calls stack for this method...');
+  if (getNewBallPositionMethodCounter >= MAX_ACCEPTED_RECURSIVE_CALLS) {
+    throw Error('Max recursive calls stack for this method...');
+  }
 
   const currentBallPosition = fieldMaps.ball.position;
 
-  const fieldLimitInTop = newBallPosition.row <= FIELD_ROW_MIN_LIMIT;
-  const fieldLimitInBottom = newBallPosition.row >= FIELD_ROW_MAX_LIMIT;
-  const fieldLimitInLeft = newBallPosition.column <= FIELD_COLUMN_MIN_LIMIT;
-  const fieldLimitInRight = newBallPosition.column >= FIELD_COLUMN_MAX_LIMIT;
+  const fieldLimitInTop = rowPositionToTop(newBallPosition.row) < FIELD_ROW_MIN_LIMIT;
+  const fieldLimitInBottom = rowPositionToBottom(newBallPosition.row) > FIELD_ROW_MAX_LIMIT;
+  const fieldLimitInLeft = columnPositionToLeft(newBallPosition.column) < FIELD_COLUMN_MIN_LIMIT;
+  const fieldLimitInRight = columnPositionToRight(newBallPosition.column) > FIELD_COLUMN_MAX_LIMIT;
 
-  const ballGoingToTop_ = newBallPosition.row < currentBallPosition.row && newBallPosition.column == currentBallPosition.column;
-  const ballGoingToBottom_ = newBallPosition.row > currentBallPosition.row && newBallPosition.column == currentBallPosition.column;
-  const ballGoingToLeft_ = newBallPosition.column < currentBallPosition.column && newBallPosition.row == currentBallPosition.row;
-  const ballGoingToRight_ = newBallPosition.column > currentBallPosition.column && newBallPosition.row == currentBallPosition.row;
-
-  const ballGoingToTopLeft_ = newBallPosition.row < currentBallPosition.row && newBallPosition.column < currentBallPosition.column;
-  const ballGoingToTopRight_ = newBallPosition.row < currentBallPosition.row && newBallPosition.column > currentBallPosition.column;
-  const ballGoingToBottomLeft_ = newBallPosition.row > currentBallPosition.row && newBallPosition.column < currentBallPosition.column;
-  const ballGoingToBottomRight_ = newBallPosition.row > currentBallPosition.row && newBallPosition.column > currentBallPosition.column;
+  const ballGoingToTop_ = newBallPosition.action.length === 1 && newBallPosition.action.includes(ACTION_TOP);
+  const ballGoingToBottom_ = newBallPosition.action.length === 1 && newBallPosition.action.includes(ACTION_BOTTOM);
+  const ballGoingToLeft_ = newBallPosition.action.length === 1 && newBallPosition.action.includes(ACTION_LEFT);
+  const ballGoingToRight_ = newBallPosition.action.length === 1 && newBallPosition.action.includes(ACTION_RIGHT);
+  const ballGoingToTopLeft_ = newBallPosition.action.length === 2 && newBallPosition.action.includes(ACTION_TOP) && newBallPosition.action.includes(ACTION_LEFT);
+  const ballGoingToTopRight_ = newBallPosition.action.length === 2 && newBallPosition.action.includes(ACTION_TOP) && newBallPosition.action.includes(ACTION_RIGHT);
+  const ballGoingToBottomLeft_ = newBallPosition.action.length === 2 && newBallPosition.action.includes(ACTION_BOTTOM) && newBallPosition.action.includes(ACTION_LEFT);
+  const ballGoingToBottomRight_ = newBallPosition.action.length === 2 && newBallPosition.action.includes(ACTION_TOP) && newBallPosition.action.includes(ACTION_RIGHT);
 
   const hasPlayerInTop_ = hasPlayer(gameState, newBallPosition.column, rowPositionToTop(newBallPosition.row));
   const hasPlayerInBottom_ = hasPlayer(gameState, newBallPosition.column, rowPositionToBottom(newBallPosition.row));
@@ -202,7 +231,13 @@ const getNewBallPosition = async (fieldMaps, gameState, newBallPosition) => {
   }
 
 
-  if (
+  if (ballGoingToTopRight_ && !hasObjectInTopRight()) {
+    let position = predictNewBallPosition(newBallPosition);
+    await showBallHtmlElement(newBallPosition, position);
+    return position;
+  }
+  
+  else if (
     ballGoingToTopRight_ ||
     (ballGoingToBottomLeft_ && hasObjectInBottomLeft()) ||
     (ballGoingToBottomRight_ && hasObjectInBottom()) ||
@@ -217,6 +252,12 @@ const getNewBallPosition = async (fieldMaps, gameState, newBallPosition) => {
     const nextBallPosition = await getNewBallPosition(fieldMaps, gameState,  position);
     await showBallHtmlElement(newBallPosition, nextBallPosition);
     return nextBallPosition;
+  }
+
+  else if (ballGoingToTopLeft_ && !hasObjectInTopLeft()) {
+    let position = predictNewBallPosition(newBallPosition);
+    await showBallHtmlElement(newBallPosition, position);
+    return position;
   }
 
   else if (
@@ -236,6 +277,12 @@ const getNewBallPosition = async (fieldMaps, gameState, newBallPosition) => {
     return nextBallPosition;
   }
 
+  else if (ballGoingToBottomRight_ && !hasObjectInBottomRight()) {
+    let position = predictNewBallPosition(newBallPosition);
+    await showBallHtmlElement(newBallPosition, position);
+    return position;
+  }
+
   else if (
     ballGoingToBottomRight_ ||
     (ballGoingToBottomLeft_ && hasObjectInLeft()) ||
@@ -251,6 +298,12 @@ const getNewBallPosition = async (fieldMaps, gameState, newBallPosition) => {
     const nextBallPosition = await getNewBallPosition(fieldMaps, gameState,  position);
     await showBallHtmlElement(newBallPosition, nextBallPosition);
     return nextBallPosition;
+  }
+
+  else if (ballGoingToBottomLeft_ && !hasObjectInBottomLeft()) {
+    let position = predictNewBallPosition(newBallPosition);
+    await showBallHtmlElement(newBallPosition, position);
+    return position;
   }
 
   else if (
@@ -270,6 +323,12 @@ const getNewBallPosition = async (fieldMaps, gameState, newBallPosition) => {
     return nextBallPosition;
   }
 
+  else if (ballGoingToBottom_ && !hasObjectInBottom()) {
+    let position = predictNewBallPosition(newBallPosition);
+    await showBallHtmlElement(newBallPosition, position);
+    return position;
+  }
+
   else if (
     ballGoingToBottom_ ||
     (ballGoingToTop_ && hasObjectInTop())
@@ -283,6 +342,12 @@ const getNewBallPosition = async (fieldMaps, gameState, newBallPosition) => {
     const nextBallPosition = await getNewBallPosition(fieldMaps, gameState,  position);
     await showBallHtmlElement(newBallPosition, nextBallPosition);
     return nextBallPosition;
+  }
+
+  else if (ballGoingToTop_ && !hasObjectInTop()) {
+    let position = predictNewBallPosition(newBallPosition);
+    await showBallHtmlElement(newBallPosition, position);
+    return position;
   }
 
   else if (
@@ -300,6 +365,12 @@ const getNewBallPosition = async (fieldMaps, gameState, newBallPosition) => {
     return nextBallPosition;
   }
 
+  else if (ballGoingToRight_ && !hasObjectInRight()) {
+    let position = predictNewBallPosition(newBallPosition);
+    await showBallHtmlElement(newBallPosition, position);
+    return position;
+  }
+
   else if (
     ballGoingToRight_ ||
     (ballGoingToLeft_ && hasObjectInLeft())
@@ -313,7 +384,13 @@ const getNewBallPosition = async (fieldMaps, gameState, newBallPosition) => {
     const nextBallPosition = await getNewBallPosition(fieldMaps, gameState,  position);
     await showBallHtmlElement(newBallPosition, nextBallPosition);
     return nextBallPosition;
-  } 
+  }
+
+  else if (ballGoingToLeft_ && !hasObjectInLeft()) {
+    let position = predictNewBallPosition(newBallPosition);
+    await showBallHtmlElement(newBallPosition, position);
+    return position;
+  }
 
   else if (
     ballGoingToLeft_ ||
