@@ -10,7 +10,7 @@ import {
 import { ACTION_STOPPED } from './configs.js';
 import FieldMapsModel from './models/FieldMapsModel.js';
 import GameStateModel from './models/GameStateModel.js';
-import { predictNewBallPosition, getNewBallPosition } from './actions.js';
+import { predictNewBallPosition, treatNewBallPosition } from './actions.js';
 
 /**
  * Start game.
@@ -68,9 +68,10 @@ const refreshGame = async (fieldMaps, gameState) => {
   if (!fieldMaps.ball.position.action.includes(ACTION_STOPPED)) {
     log('update ball position...');
 
+    const currentBallPosition = { ...newFieldMaps.ball.position };
     const newBallPosition = predictNewBallPosition(fieldMaps.ball.position);
 
-    newFieldMaps.ball.position = await getNewBallPosition(fieldMaps, gameState, newBallPosition); 
+    newFieldMaps.ball.position = await treatNewBallPosition(fieldMaps, gameState, currentBallPosition, newBallPosition); 
   }
 
   return {
