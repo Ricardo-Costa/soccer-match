@@ -152,7 +152,6 @@ let treatNewBallPositionMethodCounter = 0;
 const treatNewBallPosition = async (fieldMaps, gameState, currentBallPosition, newBallPosition) => {
   log(treatNewBallPosition.name);
 
-  console.log(`${newBallPosition.action.join(' ')} --> c${newBallPosition.column}r${newBallPosition.row}`)
 
   treatNewBallPositionMethodCounter++;
   if (treatNewBallPositionMethodCounter >= MAX_ACCEPTED_RECURSIVE_CALLS) {
@@ -235,7 +234,7 @@ const treatNewBallPosition = async (fieldMaps, gameState, currentBallPosition, n
   }
   
   else if (
-    ballGoingToTopRight_ ||
+    ballGoingToTopRight_ || /* TODO remover essas partes */
     (ballGoingToBottomLeft_ && hasObjectInBottomLeft()) ||
     (ballGoingToBottomRight_ && hasObjectInBottom()) ||
     (ballGoingToTopLeft_ && hasObjectInLeft())
