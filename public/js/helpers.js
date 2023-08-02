@@ -80,11 +80,7 @@ const isBallBlock = (fieldMaps, column, row) => {
  */
 const removeFromHtmlClasses = (htmlClasses, targetClass, htmlEl) => {
   let classes = htmlClasses.split(" ");
-  const index = classes.indexOf(targetClass);
-  if (index >= 0) {
-    classes.splice(index, 1);
-    htmlEl.className = classes.join(" ");
-  }
+  htmlEl.className = classes.filter(className => className != targetClass).join(" ");
 }
 
 /**

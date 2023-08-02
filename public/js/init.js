@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     new PlayerModel('Sergio Ramos', new PositionModel(4, 3, [ACTION_STOPPED]), TEAMS.RED),
     new PlayerModel('Hulk', new PositionModel(10, 2, [ACTION_STOPPED]), TEAMS.RED),
     new PlayerModel('Adriano', new PositionModel(6, 9, [ACTION_STOPPED]), TEAMS.RED),
-    new PlayerModel('Ibrahimović', new PositionModel(6, 6, [ACTION_STOPPED]), TEAMS.RED),
+    new PlayerModel('Ibrahimović', new PositionModel(6, 7, [ACTION_STOPPED]), TEAMS.RED),
     new PlayerModel('Didier Drogba', new PositionModel(18, 9, [ACTION_STOPPED]), TEAMS.RED),
     new PlayerModel('Pelé', new PositionModel(8, 6, [ACTION_STOPPED]), TEAMS.BLUE),
     new PlayerModel('Cristiano Ronaldo', new PositionModel(8, 3, [ACTION_STOPPED]), TEAMS.BLUE),
@@ -56,17 +56,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   startGame(fieldMaps, gameState);
 
-  let TEMP_COUNTER = 10;
-  while(TEMP_COUNTER) {
+  // TODO movimentação da bola
+  fieldMaps.ball.whoKicked = gameState.players[4];
+  fieldMaps.ball.position.action = [ ACTION_TOP, ACTION_RIGHT ];
 
-    // TODO movimentação da bola
-    fieldMaps.ball.whoKicked = gameState.players[4];
-    fieldMaps.ball.position.action = [ ACTION_TOP, ACTION_RIGHT ];
-
+  while(true) {
     const { newFieldMaps, newGameState } = await refreshGame(fieldMaps, gameState);
     gameState = newGameState;
     fieldMaps = newFieldMaps;
-
-    TEMP_COUNTER--;
   }
 });

@@ -71,6 +71,7 @@ const refreshGame = async (fieldMaps, gameState) => {
     const currentBallPosition = { ...newFieldMaps.ball.position };
     const newBallPosition = predictNewBallPosition(fieldMaps.ball.position);
 
+    window['treatNewBallPositionMethodCounter'] = 0;
     newFieldMaps.ball.position = await treatNewBallPosition(fieldMaps, gameState, currentBallPosition, newBallPosition); 
   }
 

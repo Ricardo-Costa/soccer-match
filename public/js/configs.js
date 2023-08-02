@@ -1,4 +1,4 @@
-const RENDER_INTERVAL = 500; // ms
+const RENDER_INTERVAL = 100; // ms
 
 const LOG_LEVEL = 'none';// none|debug
 
